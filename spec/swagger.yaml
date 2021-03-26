@@ -1,0 +1,94 @@
+swagger: '2.0'
+info:
+  title: Lighthouse API
+  version: '1.0'
+host: localhost
+basePath: /
+schemes:
+  - http
+
+paths:
+  /lighthouse:
+    get:
+      responses:
+        '200':
+          description: All known lighthouses
+          schema:
+            $ref: '#/definitions/lighthouse'
+  /lighthouse/state:
+    post:
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              address:
+                $ref: '#definitions/lighthouse/properties/address'
+              state:
+                $ref: '#definitions/lighthouse/properties/state'
+      responses:
+        '200':
+          description: State changed successfully
+          schema:
+            $ref: '#/definitions/lighthouse'
+        '400':
+          description: Malformed request
+          schema:
+            $ref: '#/definitions/error'
+        '429':
+          description: Rate limited (can only change state so often)
+          schema:
+            $ref: '#/definitions/error'
+  /scan:
+    post:
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              timeout:
+                type: integer
+                description: how long to scan for (in seconds)
+                minimum: 1
+                maximum: 10
+                default: 5
+      responses:
+        '200':
+          description: Rescan successfully completed
+          schema:
+            $ref: '#/definitions/lighthouse'
+        '400':
+          description: Malformed request
+          schema:
+            $ref: '#/definitions/error'
+        '429':
+          description: Rate limited (can only rescan so often)
+          schema:
+            $ref: '#/definitions/error'
+
+definitions:
+  lighthouse:
+    type: object
+    properties:
+      address:
+        description: MAC Address
+        type: string
+      name:
+        description: Human readable name
+        type: string
+      state:
+        description: What state the lighthouse is currently in
+        type: string
+        enum:
+          - "on"
+          - "off"
+          - "booting"
+          - "unknown"
+  error:
+    type: object
+    properties:
+      message:
+        type: string
+      
